@@ -11,7 +11,7 @@ Claude Code subagent transcripts don't store user prompts - only assistant respo
 - Agents forgetting what you asked them to do
 - Loss of precise data (codes, paths, values get corrupted)
 
-See [bug report](link-to-issue) for full details.
+See [bug report](https://github.com/anthropics/claude-code/issues/11712) for full details.
 
 ## The Solution
 
