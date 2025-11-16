@@ -65,6 +65,13 @@ fi
 prompt=$(echo "$prompt_entry" | jq -r '.prompt')
 timestamp=$(echo "$prompt_entry" | jq -r '.timestamp')
 
+# Check if this exact prompt already exists in transcript (duplicate protection)
+if grep -qF "\"content\":\"$prompt\"" "$agent_transcript" 2>/dev/null; then
+    log "Prompt already exists in transcript, skipping duplicate injection"
+    echo "✓ Subagent dispatched (ID: $agent_id)"
+    exit 0
+fi
+
 log "Injecting prompt: $(echo "$prompt" | head -c 50)..."
 
 # Create user message entry in agent transcript format

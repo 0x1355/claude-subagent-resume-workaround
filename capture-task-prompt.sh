@@ -41,6 +41,12 @@ if [[ -n "$resume" ]] && [[ "$resume" != "null" ]] && [[ "$resume" != "" ]]; the
     log "RESUME: Appending to agent $resume at $agent_transcript"
 
     if [[ -f "$agent_transcript" ]]; then
+        # Check if this exact prompt already exists (duplicate protection)
+        if grep -qF "\"content\":\"$prompt\"" "$agent_transcript" 2>/dev/null; then
+            log "RESUME: Prompt already exists, skipping duplicate"
+            exit 0
+        fi
+
         user_entry=$(jq -n \
             --arg agent_id "$resume" \
             --arg session_id "$session_id" \
