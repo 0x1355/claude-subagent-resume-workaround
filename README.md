@@ -15,11 +15,13 @@ See [bug report](https://github.com/anthropics/claude-code/issues/11712) for ful
 
 ## The Solution
 
-This workaround uses hooks to capture user prompts and inject them into subagent transcripts in the correct chronological order:
+This workaround uses three hooks to fix subagent resume and make agent IDs visible:
 
-- **PreToolUse hook** captures prompts before Task tool executes
-- **SubagentStop hook** injects prompts into agent transcripts
-- Result: Subagent resume works reliably across multiple turns
+- **PreToolUse (Task)** - Captures prompts before Task tool executes
+- **SubagentStop** - Injects prompts into agent transcripts in correct chronological order
+- **PostToolUse (Task)** - Injects agent IDs into parent context for visibility
+
+**Result:** Subagent resume works reliably across multiple turns, and main agent automatically sees all agent IDs
 
 ## Installation
 
@@ -28,6 +30,7 @@ This workaround uses hooks to capture user prompts and inject them into subagent
    mkdir -p ~/.claude/scripts
    cp capture-task-prompt.sh ~/.claude/scripts/
    cp inject-agent-prompts.sh ~/.claude/scripts/
+   cp task-posttooluse.sh ~/.claude/scripts/
    chmod +x ~/.claude/scripts/*.sh
    ```
 
@@ -57,6 +60,17 @@ This workaround uses hooks to capture user prompts and inject them into subagent
              }
            ]
          }
+       ],
+       "PostToolUse": [
+         {
+           "matcher": "Task",
+           "hooks": [
+             {
+               "type": "command",
+               "command": "bash $HOME/.claude/scripts/task-posttooluse.sh"
+             }
+           ]
+         }
        ]
      }
    }
@@ -72,37 +86,41 @@ Test with a simple dispatch and resume:
 # Dispatch
 > Use general-purpose agent to remember code APPLE-123 and standby
 
-# After it completes, find agent ID in logs:
-tail -5 /tmp/subagent_hook_debug.log
+# The main agent will automatically see in its context:
+# "✓ Subagent dispatched (ID: abc123def)"
 
 # Resume with that agent ID
-> Resume agent <agent-id> and tell me the code
+> Resume agent abc123def and tell me the code
 ```
 
 The agent should correctly remember APPLE-123.
 
-**Note:** After each subagent completes, you'll see a message like `✓ Subagent completed (ID: abc123)` - this is the agent ID you can use for resuming.
+**Agent ID Visibility:** After each Task tool completes, the main agent automatically receives the agent ID in its context via PostToolUse hook. No manual tracking needed!
 
 ## How It Works
 
 ### For New Dispatches (DISPATCH):
-1. PreToolUse captures prompt → stores in queue (`/tmp/task_prompts_queue.jsonl`)
+1. **PreToolUse** captures prompt → stores in queue (`/tmp/task_prompts_queue.jsonl`)
 2. Agent executes → writes assistant responses to transcript
-3. SubagentStop fires → reads queue → **prepends** user prompt to top of transcript
-4. Result: `user → assistant` (correct order)
+3. **SubagentStop** fires → reads queue → **prepends** user prompt to top of transcript
+4. **PostToolUse** fires → extracts agent ID → injects into parent context via `additionalContext`
+5. Result: `user → assistant` (correct order) + main agent sees agent ID
 
 ### For Resumes (RESUME):
-1. PreToolUse detects resume parameter → **appends** user prompt immediately to existing transcript
+1. **PreToolUse** detects resume parameter → **appends** user prompt immediately to existing transcript
 2. Agent executes → writes assistant response
-3. SubagentStop fires → sees first entry is already user → skips (prevents duplicates)
-4. Result: `...existing → user → assistant` (correct order)
+3. **SubagentStop** fires → sees first entry is already user → skips (prevents duplicates)
+4. **PostToolUse** fires → injects agent ID into parent context
+5. Result: `...existing → user → assistant` (correct order) + main agent sees agent ID
 
 ## Verification
 
-After each subagent completes, you should see:
+After each Task tool completes, the main agent's context will include:
 ```
-✓ Subagent completed (ID: abc123def)
+PostToolUse:Task hook additional context: ✓ Subagent dispatched (ID: abc123def)
 ```
+
+This appears as a system reminder visible to the main agent, allowing it to reference the agent ID for resume operations.
 
 ### Debug Mode (Optional)
 

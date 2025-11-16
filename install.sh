@@ -11,10 +11,12 @@ mkdir -p ~/.claude/scripts
 # Copy scripts
 cp capture-task-prompt.sh ~/.claude/scripts/
 cp inject-agent-prompts.sh ~/.claude/scripts/
+cp task-posttooluse.sh ~/.claude/scripts/
 
 # Make executable
 chmod +x ~/.claude/scripts/capture-task-prompt.sh
 chmod +x ~/.claude/scripts/inject-agent-prompts.sh
+chmod +x ~/.claude/scripts/task-posttooluse.sh
 
 echo "✓ Scripts installed to ~/.claude/scripts/"
 
