@@ -23,6 +23,26 @@ This workaround uses three hooks to fix subagent resume and make agent IDs visib
 
 **Result:** Subagent resume works reliably across multiple turns, and main agent automatically sees all agent IDs
 
+## Requirements
+
+- **jq** - JSON processor (required for all hook scripts)
+
+**Install jq:**
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# Alpine (Docker containers)
+apk add jq
+
+# macOS
+brew install jq
+
+# Fedora/RHEL
+sudo dnf install jq
+```
+
 ## Installation
 
 **Single command installation:**
@@ -49,20 +69,7 @@ This workaround uses three hooks to fix subagent resume and make agent IDs visib
 - Makes all scripts executable
 - Preserves all your existing settings
 
-**If you don't have jq installed:**
-
-The script will still copy the hook scripts but will show manual merge instructions. To enable automatic merging:
-
-```bash
-# Ubuntu/Debian
-sudo apt-get install jq
-
-# macOS
-brew install jq
-
-# Fedora
-sudo dnf install jq
-```
+**Note:** If `jq` is not installed, the installer will still copy the hook scripts but will show manual merge instructions instead of automatically merging settings. However, **the hooks themselves require jq to function**.
 
 **Then restart Claude Code** for hooks to take effect
 
@@ -145,6 +152,7 @@ cat ~/.claude/projects/-<project-name>/agent-<agent-id>.jsonl | jq -c '{type: .t
 ## Troubleshooting
 
 **Hooks not running:**
+- Verify `jq` is installed: `which jq`
 - Check `~/.claude/settings.json` syntax is valid JSON
 - Restart Claude Code
 - Check script permissions: `ls -la ~/.claude/scripts/`

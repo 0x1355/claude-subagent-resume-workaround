@@ -3,6 +3,13 @@
 
 set -e
 
+# Check for jq dependency
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed. Hook requires jq for JSON parsing." >&2
+    echo "Install: apt-get install jq (Ubuntu) | apk add jq (Alpine) | brew install jq (macOS)" >&2
+    exit 1
+fi
+
 # Setup logging (only if debug mode enabled)
 if [[ "$CLAUDE_HOOK_DEBUG" == "1" ]]; then
     mkdir -p ~/.claude/logs
