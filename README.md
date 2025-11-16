@@ -25,58 +25,46 @@ This workaround uses three hooks to fix subagent resume and make agent IDs visib
 
 ## Installation
 
-1. **Copy hook scripts:**
-   ```bash
-   mkdir -p ~/.claude/scripts
-   cp capture-task-prompt.sh ~/.claude/scripts/
-   cp inject-agent-prompts.sh ~/.claude/scripts/
-   cp task-posttooluse.sh ~/.claude/scripts/
-   chmod +x ~/.claude/scripts/*.sh
-   ```
+**Single command installation:**
 
-2. **Update Claude Code settings:**
-   Add to `~/.claude/settings.json`:
-   ```json
-   {
-     "hooks": {
-       "PreToolUse": [
-         {
-           "matcher": "Task",
-           "hooks": [
-             {
-               "type": "command",
-               "command": "bash $HOME/.claude/scripts/capture-task-prompt.sh"
-             }
-           ]
-         }
-       ],
-       "SubagentStop": [
-         {
-           "matcher": "*",
-           "hooks": [
-             {
-               "type": "command",
-               "command": "bash $HOME/.claude/scripts/inject-agent-prompts.sh"
-             }
-           ]
-         }
-       ],
-       "PostToolUse": [
-         {
-           "matcher": "Task",
-           "hooks": [
-             {
-               "type": "command",
-               "command": "bash $HOME/.claude/scripts/task-posttooluse.sh"
-             }
-           ]
-         }
-       ]
-     }
-   }
-   ```
+```bash
+./install.sh
+```
 
-3. **Restart Claude Code** for hooks to take effect
+**Options:**
+
+```bash
+./install.sh --level <local|shared|user>
+```
+
+- `--level user` (default): Install to `~/.claude/settings.json`
+- `--level shared`: Install to `~/.config/claude/settings.json`
+- `--level local`: Install to `./.claude/settings.json` (current directory)
+
+**What it does:**
+
+- Copies hook scripts to `~/.claude/scripts/`
+- Creates automatic backup of existing settings (with timestamp)
+- Intelligently merges hooks into your settings.json (requires `jq`)
+- Makes all scripts executable
+- Preserves all your existing settings
+
+**If you don't have jq installed:**
+
+The script will still copy the hook scripts but will show manual merge instructions. To enable automatic merging:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# macOS
+brew install jq
+
+# Fedora
+sudo dnf install jq
+```
+
+**Then restart Claude Code** for hooks to take effect
 
 ## Testing
 
