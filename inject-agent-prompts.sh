@@ -42,7 +42,7 @@ first_type=$(head -1 "$agent_transcript" | jq -r '.type // empty' 2>/dev/null)
 if [[ "$first_type" == "user" ]]; then
     log "First entry already user type, skipping injection (already processed)"
     # Still output agent ID for main agent to see
-    echo "✓ Subagent completed (ID: $agent_id)"
+    echo "✓ Subagent completed (ID: $agent_id)" >&2
     exit 0
 fi
 
@@ -68,7 +68,7 @@ timestamp=$(echo "$prompt_entry" | jq -r '.timestamp')
 # Check if this exact prompt already exists in transcript (duplicate protection)
 if grep -qF "\"content\":\"$prompt\"" "$agent_transcript" 2>/dev/null; then
     log "Prompt already exists in transcript, skipping duplicate injection"
-    echo "✓ Subagent dispatched (ID: $agent_id)"
+    echo "✓ Subagent dispatched (ID: $agent_id)" >&2
     exit 0
 fi
 
@@ -105,7 +105,7 @@ cat "$agent_transcript" >> "${agent_transcript}.tmp"
 mv "${agent_transcript}.tmp" "$agent_transcript"
 
 # Output agent ID to stdout (main agent will see this)
-echo "✓ Subagent dispatched (ID: $agent_id)"
+echo "✓ Subagent dispatched (ID: $agent_id)" >&2
 
 log "Injected prompt for agent $agent_id"
 
