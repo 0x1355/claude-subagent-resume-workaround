@@ -98,7 +98,7 @@ cat "$agent_transcript" >> "${agent_transcript}.tmp"
 mv "${agent_transcript}.tmp" "$agent_transcript"
 
 # Output agent ID to stdout (main agent will see this)
-echo "✓ Subagent completed (ID: $agent_id)"
+echo "✓ Subagent dispatched (ID: $agent_id)"
 
 log "Injected prompt for agent $agent_id"
 
