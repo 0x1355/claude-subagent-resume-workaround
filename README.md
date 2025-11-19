@@ -57,13 +57,14 @@ sudo dnf install jq
 ./install.sh --level <local|shared|user>
 ```
 
-- `--level user` (default): Install to `~/.claude/settings.json`
+- `--level user` (default): Install to `$CLAUDE_CONFIG_DIR/settings.json` if set (sandbox mode), otherwise `~/.claude/settings.json`
 - `--level shared`: Install to `~/.config/claude/settings.json`
 - `--level local`: Install to `./.claude/settings.json` (current directory)
 
 **What it does:**
 
 - Copies hook scripts to `~/.claude/scripts/`
+- Detects sandbox mode (`$CLAUDE_CONFIG_DIR`) and installs to the correct settings location
 - Creates automatic backup of existing settings (with timestamp)
 - Intelligently merges hooks into your settings.json (requires `jq`)
 - Makes all scripts executable

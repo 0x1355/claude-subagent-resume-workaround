@@ -43,8 +43,16 @@ fi
 # Determine settings path based on level
 case "$LEVEL" in
   user)
-    SETTINGS_PATH="$HOME/.claude/settings.json"
-    SETTINGS_DIR="$HOME/.claude"
+    # If CLAUDE_CONFIG_DIR is set, use that (sandbox mode)
+    # Otherwise fall back to ~/.claude/settings.json
+    if [[ -n "$CLAUDE_CONFIG_DIR" ]] && [[ -d "$CLAUDE_CONFIG_DIR" ]]; then
+      SETTINGS_PATH="$CLAUDE_CONFIG_DIR/settings.json"
+      SETTINGS_DIR="$CLAUDE_CONFIG_DIR"
+      echo "ℹ  Detected CLAUDE_CONFIG_DIR, installing to sandbox config"
+    else
+      SETTINGS_PATH="$HOME/.claude/settings.json"
+      SETTINGS_DIR="$HOME/.claude"
+    fi
     ;;
   shared)
     SETTINGS_PATH="$HOME/.config/claude/settings.json"
